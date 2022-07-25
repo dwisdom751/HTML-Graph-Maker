@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<html>
+
+
+<center><canvas id = "myCan" Height = "600" Width = "600" onclick="processMouse(event)"></canvas></center>
+
+
+<script>
+
+class vertex{
+	constructor(startX, startY)
+	{
+		this.posX = startX;
+		this.posY = startY;
+	}
+}
+
+class edge{
+	constructor(vert1, vert2)
+	{
+		this.vertices = [vert1,vert2]
+	}
+}
+
+function drawGraph(drawOn, edges, verts)
+{
+	for(let count = 0; count < edges.length; count++)
+	{
+		drawOn.beginPath()
+		v1 = edges[count].vertices[0]
+		v2 = edges[count].vertices[1]
+		drawOn.moveTo(v1.posX, v1.posY)
+		drawOn.lineTo(v2.posX, v2.posY)
+		drawOn.stroke()
+	}
+	for(let count = 0; count < verts.length; count++)
+	{
+		drawOn.beginPath()
+		drawOn.arc(verts[count].posX, verts[count].posY, 10, 0, 2 * Math.PI)
+		drawOn.fillStyle = "#FF0000";
+		drawOn.fill()
+		drawOn.fillStyle = "#000000";
+
+		
+	}
+}
+
+g_edges = [];//= [new edge(new vertex(120,370), new vertex(420,70))]
+g_verts = []
+selVert = new vertex(0,0)
+
+can = document.getElementById("myCan");
+canTX = can.getContext("2d");
+
+//0 for select mode, 1 for place mode
+mode = 0;
+
+function mainLoop()
+{
+	canTX.clearRect(0, 0, can.width, can.height);
+	drawGraph(canTX, g_edges, g_verts)
+	
+}
+
+
+function processMouse(event)
+{
+
+	var rect = can.getBoundingClientRect();
+	
+	
+	if(mode == 0)
+	{
+		xPos = event.clientX-rect.left;
+		yPos = event.clientY-rect.top;
+		
+		minDist = 100000
+		cloestVert = new vertex(0,0)
+		
+		for(let count = 0; count < g_verts.length; count++)
+		{
+			vertX = g_verts[count].posX;
+			vertY = g_verts[count].posY;
+			
+			dist = Math.sqrt((vertX-xPos)**2+(vertY-yPos)**2)
+			
+			if(dist < minDist)
+			{
+				cloestVert = g_verts[count];
+				minDist = dist;
+			}
+		}
+		
+		if(minDist >= 10)
+		{
+			cloestVert = new vertex(xPos,yPos);
+			g_verts.push(cloestVert);
+		}
+		
+		selVert = cloestVert;
+		
+		mode = 1;
+		
+	}
+	else if(mode == 1)
+	{
+		xPos = event.clientX-rect.left;
+		yPos = event.clientY-rect.top;
+		
+		minDist = 100000
+		cloestVert = new vertex(0,0)
+		
+		for(let count = 0; count < g_verts.length; count++)
+		{
+			vertX = g_verts[count].posX;
+			vertY = g_verts[count].posY;
+			
+			dist = Math.sqrt((vertX-xPos)**2+(vertY-yPos)**2)
+			
+			if(dist < minDist)
+			{
+				cloestVert = g_verts[count];
+				minDist = dist;
+			}
+		}
+		
+		if(minDist >= 10)
+		{
+			cloestVert = new vertex(xPos,yPos);
+			g_verts.push(cloestVert);
+		}
+		
+		g_edges.push(new edge(selVert, cloestVert))
+		
+		mode = 0;
+		
+
+	}
+}
+
+
+setInterval(mainLoop,15)
+
+
+</script>
+
+
+</html>
